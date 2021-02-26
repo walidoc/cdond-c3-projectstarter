@@ -65,8 +65,8 @@ jobs:
              # Your code here
              cd ~/project/backend
              npm i
-             npm run format
-             npm run lint
+            #  npm run format
+            #  npm run lint
              npm run build
       - save_cache:
           paths: [backend/node_modules]
