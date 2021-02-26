@@ -133,6 +133,9 @@ jobs:
             cd ~/project/backend
             npm audit fix --audit-level=critical --force
           when: on_fail
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
             
 
 #   deploy-infrastructure:
