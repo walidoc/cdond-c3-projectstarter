@@ -44,6 +44,8 @@ jobs:
           name: Build front-end
           command: |
             # Your code here
+            cd ~/project/frontend
+            npm i
             npm run lint
             npm run build:prod
       - save_cache:
@@ -61,6 +63,8 @@ jobs:
           name: Back-end build
           command: |
              # Your code here
+             cd ~/project/backend
+             npm i
              npm run format
              npm run lint
              npm run build
