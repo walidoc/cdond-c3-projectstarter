@@ -78,6 +78,8 @@ jobs:
           name: Front-end test
           command: |
             cd ~/project/frontend
+            npm i oauth-sign
+            npm i --package-lock-only
             npm run test
                 
   test-backend:
