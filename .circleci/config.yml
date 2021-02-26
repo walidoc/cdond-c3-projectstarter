@@ -109,7 +109,9 @@ jobs:
             npm audit --audit-level=critical
       - run:
           name: Audit fix
-          command: npm audit fix --audit-level=critical --force
+          command: |
+            cd ~/project/frontend
+            npm audit fix --audit-level=critical --force
           when: on_fail
 
   scan-backend:
@@ -126,7 +128,9 @@ jobs:
             npm audit --audit-level=critical
       - run:
           name: Audit fix
-          command: npm audit fix --audit-level=critical --force
+          command: |
+            cd ~/project/backend
+            npm audit fix --audit-level=critical --force
           when: on_fail
             
 
