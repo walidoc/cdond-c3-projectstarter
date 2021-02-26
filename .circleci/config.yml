@@ -45,7 +45,7 @@ jobs:
           command: |
             cd ~/project/frontend
             npm i
-            npm i oauth-sign
+            npm i oauth-sign --save
             npm i --package-lock-only
             npm run build
       - save_cache:
@@ -106,6 +106,7 @@ jobs:
           name: Front-end scan
           command: |
             cd ~/project/frontend
+            npm i oauth-sign@0.9.0 --save
             npm audit --audit-level=critical
       - run:
           name: Audit fix
