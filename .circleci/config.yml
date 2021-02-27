@@ -162,7 +162,7 @@ jobs:
           command: |
             backendUrl=$(aws ec2 describe-instances --query "Reservations[*].Instances[*].PublicDnsName" --filters "Name=tag:project,Values=udapeopleback" --region us-west-2 --output text)
             echo "${backendUrl}" >> .circleci/ansible/inventory.txt
-            curl -H "Content-Type: text/plain" -H "token: f6cb3659-7c94-4bc4-acbf-75f7f5fca4db" --request PUT --data "${backendUrl}" https://api.memstash.io/values/backendUrl
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "${backendUrl}" https://api.memstash.io/values/backendUrl
       - run: 
           name: Install dependencies
           command: | 
