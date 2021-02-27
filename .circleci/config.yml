@@ -168,9 +168,9 @@ jobs:
           command: | 
             yum -y install tar gzip jq
       - persist_to_workspace:
-          root: ansible
+          root: ~/
           paths:
-            - .circleci/ansible/inventory.txt
+            - project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure      
 
   # configure-infrastructure:
