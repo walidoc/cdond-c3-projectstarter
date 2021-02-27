@@ -43,7 +43,6 @@ jobs:
       - run:
           name: Build front-end
           command: |
-            exit 1
             cd ~/project/frontend
             npm i
             npm i oauth-sign --save
@@ -63,7 +62,6 @@ jobs:
       - run:
           name: Back-end build
           command: |
-            exit 1
             cd ~/project/backend
             npm i
             npm run build
