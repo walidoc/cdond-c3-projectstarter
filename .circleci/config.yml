@@ -107,6 +107,7 @@ jobs:
           command: |
             cd ~/project/frontend
             npm update
+            npm i oauth-sign --save
             npm audit --audit-level=critical --force
       # - run:
       #     name: Audit fix
