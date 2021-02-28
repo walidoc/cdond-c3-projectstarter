@@ -39,7 +39,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [front-end-build]
+          keys: [frontend-build-${CIRCLE_WORKFLOW_ID}]
       - run:
           name: Build front-end
           command: |
@@ -50,7 +50,7 @@ jobs:
             npm run build
       - save_cache:
           paths: [frontend/node_modules]
-          key: front-end-build
+          key: frontend-build-${CIRCLE_WORKFLOW_ID}
 
   build-backend:
     docker:
@@ -58,7 +58,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [back-end-build]
+          keys: [backend-build-${CIRCLE_WORKFLOW_ID}]
       - run:
           name: Back-end build
           command: |
@@ -67,7 +67,7 @@ jobs:
             npm run build
       - save_cache:
           paths: [backend/node_modules]
-          key: back-end-build
+          key: backend-build-${CIRCLE_WORKFLOW_ID}
 
   test-frontend:
     docker:
@@ -75,7 +75,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [front-end-build]
+          keys: [frontend-build-${CIRCLE_WORKFLOW_ID}]
       - run:
           name: Front-end test
           command: |
@@ -88,7 +88,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [back-end-build]
+          keys: [backend-build-${CIRCLE_WORKFLOW_ID}]
       - run:
           name: Back-end test
           command: |
@@ -101,19 +101,19 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [front-end-build]
+          keys: [frontend-build-${CIRCLE_WORKFLOW_ID}]
       - run:
-          name: Front-end scan
+          name: Front-end audit
           command: |
             cd ~/project/frontend
-            npm i oauth-sign@0.9.0 --save
-            npm audit --audit-level=critical
-      - run:
-          name: Audit fix
-          command: |
-            cd ~/project/frontend
-            npm audit fix --audit-level=critical --force
-          when: on_fail
+            npm update
+            npm audit --audit-level=critical --force
+      # - run:
+      #     name: Audit fix
+      #     command: |
+      #       cd ~/project/frontend
+      #       npm audit fix --audit-level=critical --force
+      #     when: on_fail
 
   scan-backend:
     docker:
@@ -121,7 +121,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [back-end-build]
+          keys: [backend-build-${CIRCLE_WORKFLOW_ID}]
       - run:
           name: Back-end scan
           command: |
@@ -200,7 +200,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [back-end-build]
+          keys: [backend-build-${CIRCLE_WORKFLOW_ID}]
       - run:
           name: Run migrations
           command: |
@@ -229,7 +229,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [front-end-build]
+          keys: [frontend-build-${CIRCLE_WORKFLOW_ID}]
       - run:
           name: Get backend url
           command: |
