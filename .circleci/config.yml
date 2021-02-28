@@ -227,10 +227,8 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      # - run:
-      #     name: Install dependencies
-      #     command: |
-      #       # your code here
+      - restore_cache:
+          keys: [front-end-build]
       - run:
           name: Get backend url
           command: |
@@ -239,10 +237,13 @@ jobs:
             echo "${BACKEND_IP}"
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
-      # - run:
-      #     name: Deploy frontend objects
-      #     command: |
-            # your code here
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd ~/project/frontend
+            npm run build
+            # aws s3 cp ./frontend/dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
+            aws s3 cp ./frontend/dist s3://udapeople-fc81bc1/ --recursive
       # Here's where you will add some code to rollback on failure      
                     
 #   deploy-backend:
