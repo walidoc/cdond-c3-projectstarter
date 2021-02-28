@@ -248,6 +248,7 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd ~/project/frontend
+            npm install
             npm run build
             aws s3 cp ./frontend/dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
             # aws s3 cp ./dist s3://udapeople-fc81bc1/ --recursive TO REMOVE
@@ -258,6 +259,8 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - restore_cache:
+          keys: backend-build-${CIRCLE_WORKFLOW_ID}
       - add_ssh_keys:
           fingerprints: ['2f:c0:9f:0c:82:6e:2e:00:7f:fd:b2:10:3b:d0:bf:3b']
       - attach_workspace:
