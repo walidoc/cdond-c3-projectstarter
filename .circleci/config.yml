@@ -261,6 +261,8 @@ jobs:
       - run:
           name: Deploy backend
           command: |
+            BACKEND_IP=$(curl -H "token: sometoken" --request GET https://api.memstash.io/values/backend_url) # TO CHANGE
+            echo "${BACKEND_IP}" >> ~/project/.circleci/ansible/inventory.txt # TO CHANGE
             cat ~/project/.circleci/ansible/inventory.txt
             ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       # Here's where you will add some code to rollback on failure  
