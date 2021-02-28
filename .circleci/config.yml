@@ -203,7 +203,7 @@ jobs:
           name: Run migrations
           command: |
             cd ~/project/backend
-            # cat .env
+            ls
             OUTPUT=$(npm run migrations)
       - run:
           name: Send migration results to memstash
