@@ -7,8 +7,6 @@
 
 - name: Copy dist/main page
   become: true
-  shell: |
-    ls ~/project/backend
   template:
     src: "~/project/backend/dist/main.js"
     dest: "~/web/main.js"
