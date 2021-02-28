@@ -224,7 +224,7 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: amazon/aws-cli
+      - image: sleavely/node-awscli:12.x
     steps:
       - checkout
       - restore_cache:
