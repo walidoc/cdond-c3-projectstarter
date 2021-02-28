@@ -147,23 +147,23 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=udapeopleback \
-              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeoplefront \
-              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
       - run:
           name: Add back-end ip to ansible inventory
           command: |
             BACKEND_URL=$(aws ec2 describe-instances --query "Reservations[*].Instances[*].PublicDnsName" --filters "Name=tag:project,Values=udapeopleback" --region us-west-2 --output text)
             echo "${BACKEND_URL}"
             echo "${BACKEND_URL}" >> .circleci/ansible/inventory.txt
-            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "${BACKEND_URL}" https://api.memstash.io/values/backend_url
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "${BACKEND_URL}" https://api.memstash.io/values/backend_url
       - run: 
           name: Install dependencies
           command: | 
@@ -190,7 +190,8 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+            cd ~/project/.circleci/ansible
+            ansible-playbook -i ./inventory.txt configure-server.yml
       # Here's where you will add some code to rollback on failure      
 
   run-migrations:
@@ -209,8 +210,8 @@ jobs:
           name: Send migration results to memstash
           command: |
             cd ~/project/backend
-            echo grep -c "No migrations are pending" migration
-            MIGRATION_RESULT=`grep -c "No migrations are pending" migration`
+            echo grep -c "has been executed successfully" migration
+            MIGRATION_RESULT=`grep -c "has been executed successfully" migration`
             echo $MIGRATION_RESULT
             curl -H "Content-Type: text/plain" \
                -H "token: ${CIRCLE_WORKFLOW_ID}" \
@@ -227,11 +228,13 @@ jobs:
       - image: sleavely/node-awscli:12.x
     steps:
       - checkout
+      - restore_cache:
+          keys: [front-end-build]
       - run:
           name: Get backend url
           command: |
-            # BACKEND_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/backend_url)
-            BACKEND_IP=$(curl -H "token: sometoken" --request GET https://api.memstash.io/values/backend_url)
+            BACKEND_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/backend_url)
+            # BACKEND_IP=$(curl -H "token: sometoken" --request GET https://api.memstash.io/values/backend_url)
             echo "${BACKEND_IP}"
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
@@ -239,10 +242,9 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd ~/project/frontend
-            npm i
             npm run build
-            # aws s3 cp ./frontend/dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
-            aws s3 cp ./dist s3://udapeople-fc81bc1/ --recursive
+            aws s3 cp ./frontend/dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
+            # aws s3 cp ./dist s3://udapeople-fc81bc1/ --recursive TO REMOVE
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
@@ -258,19 +260,13 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible
-            apk add --update curl
-            apk add --update npm
       - run:
           name: Deploy backend
           command: |
-            cd ~/project/backend
-            npm i
-            npm run build
-            ls 
             cd ~/project/.circleci/ansible/
-            BACKEND_IP=$(curl -H "token: sometoken" --request GET https://api.memstash.io/values/backend_url) # TO CHANGE
-            echo "${BACKEND_IP}"
-            echo "${BACKEND_IP}" >> ./inventory.txt # TO CHANGE
+            # BACKEND_IP=$(curl -H "token: sometoken" --request GET https://api.memstash.io/values/backend_url) # TO CHANGE
+            # echo "${BACKEND_IP}"
+            # echo "${BACKEND_IP}" >> ./inventory.txt # TO CHANGE
             ansible-playbook -i ./inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure  
 
