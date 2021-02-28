@@ -262,7 +262,8 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            cd ~/project/backend/
+            cd ~/project/backend
+            npm run build
             ls 
             cd ~/project/.circleci/ansible/
             BACKEND_IP=$(curl -H "token: sometoken" --request GET https://api.memstash.io/values/backend_url) # TO CHANGE
