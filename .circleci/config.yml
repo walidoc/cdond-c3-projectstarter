@@ -229,10 +229,6 @@ jobs:
       - checkout
       - restore_cache:
           keys: [front-end-build]
-      - run: 
-          name: Install dependencies
-          command: | 
-            yum -y install npm
       - run:
           name: Get backend url
           command: |
