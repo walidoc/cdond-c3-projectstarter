@@ -49,7 +49,9 @@ jobs:
             npm i --package-lock-only
             npm run build
       - save_cache:
-          paths: [frontend/node_modules]
+          paths: 
+            - frontend/node_modules
+            - frontend/dist
           key: frontend-build-${CIRCLE_WORKFLOW_ID}
 
   build-backend:
@@ -66,7 +68,9 @@ jobs:
             npm i
             npm run build
       - save_cache:
-          paths: [backend/node_modules]
+          paths: 
+            - backend/node_modules
+            - backend/dist
           key: backend-build-${CIRCLE_WORKFLOW_ID}
 
   test-frontend:
@@ -266,12 +270,8 @@ jobs:
           name: Deploy backend
           command: |
             cd ~/project/.circleci/ansible/
-            # BACKEND_URL=$(curl -H "token: sometoken" --request GET https://api.memstash.io/values/backend_url) # TO CHANGE
-            # echo "${BACKEND_URL}"
-            # echo "${BACKEND_URL}" >> ./inventory.txt # TO CHANGE
             ansible-playbook -i ./inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure  
-
   smoke-test:
     docker:
       - image: python:3.7-alpine3.11
