@@ -227,8 +227,6 @@ jobs:
       - image: sleavely/node-awscli:12.x
     steps:
       - checkout
-      - restore_cache:
-          keys: [front-end-build]
       - run:
           name: Get backend url
           command: |
@@ -241,9 +239,10 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd ~/project/frontend
+            npm i
             npm run build
             # aws s3 cp ./frontend/dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
-            aws s3 cp ./frontend/dist s3://udapeople-fc81bc1/ --recursive
+            aws s3 cp ./dist s3://udapeople-fc81bc1/ --recursive
       # Here's where you will add some code to rollback on failure      
                     
 #   deploy-backend:
