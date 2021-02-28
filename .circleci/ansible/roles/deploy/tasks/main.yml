@@ -6,7 +6,7 @@
 
 - name: Copy dist/main page
   template:
-    src: "./dist/main.js"
+    src: "~/project/backend/dist/main.js"
     dest: "~/web/main.js"
 
 - name: Executing node
