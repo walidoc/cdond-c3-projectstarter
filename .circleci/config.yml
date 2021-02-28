@@ -268,14 +268,15 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible
-            # apk add --update npm
+            apk add --update npm
       - run:
           name: Deploy backend
           command: |
             cd ~/project/backend
             ls 
-            # npm i
-            # npm run build
+            npm i
+            npm run build
+            ls
             cd ~/project/.circleci/ansible/
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i ./inventory.txt deploy-backend.yml
