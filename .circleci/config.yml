@@ -203,8 +203,7 @@ jobs:
           name: Run migrations
           command: |
             cd ~/project/backend
-            ls -al
-            cat .env
+            echo ${TYPEORM_HOST}
             OUTPUT=$(npm run migrations)
       - run:
           name: Send migration results to memstash
