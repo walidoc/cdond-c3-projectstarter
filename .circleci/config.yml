@@ -172,6 +172,8 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             BACKEND_URL=$(aws ec2 describe-instances --query "Reservations[*].Instances[*].PublicDnsName" --filters "Name=tag:project,Values=udapeopleback" --region us-west-2 --output text)
+            BACKEND_URL=$(echo $BACKEND_URL | xargs)
+            echo backend url
             echo "${BACKEND_URL}"
             echo "${BACKEND_URL}" >> .circleci/ansible/inventory.txt
             curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "${BACKEND_URL}" https://api.memstash.io/values/backend_url
