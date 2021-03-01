@@ -2,16 +2,16 @@
 - name: Creates directory
   become: true
   file:
-    path: ~/web
+    path: /home/ubuntu/backend
     state: directory
 
 - name: Copy dist/main page
   become: true
   template:
     src: "~/project/backend/dist/main.js"
-    dest: "~/web/main.js"
+    dest: "/home/ubuntu/backend/main.js"
 
 - name: Executing node
   become: true
   shell: |
-    pm2 start ~/web/main.js -f
+    pm2 start /home/ubuntu/backend/main.js -f
