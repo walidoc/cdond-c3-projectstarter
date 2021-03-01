@@ -3,7 +3,7 @@ version: 2.1
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    parameters:
+    # parameters:
       # Add parameter here   
     steps:
       - run:
@@ -16,7 +16,7 @@ commands:
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
-    parameters:
+    # parameters:
       # Add parameter here     
     steps:
       - run:
@@ -39,7 +39,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          keys: 
+            - frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Build front-end
           command: |
@@ -60,7 +61,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: backend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          keys: 
+            - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Back-end build
           command: |
@@ -79,7 +81,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          keys: 
+            - frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Front-end test
           command: |
@@ -92,7 +95,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: backend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          keys: 
+            - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Back-end test
           command: |
@@ -105,7 +109,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          keys: 
+            - frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Front-end audit
           command: |
@@ -126,7 +131,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: backend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          keys: 
+            - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Back-end scan
           command: |
@@ -205,7 +211,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: backend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          keys: 
+            - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Run migrations
           command: |
@@ -235,7 +242,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          keys: 
+            - frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Get backend url
           command: |
@@ -258,7 +266,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: backend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          keys: 
+            - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - add_ssh_keys:
           fingerprints: ['2f:c0:9f:0c:82:6e:2e:00:7f:fd:b2:10:3b:d0:bf:3b']
       - attach_workspace:
