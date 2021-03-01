@@ -358,9 +358,9 @@ jobs:
               # Delete files from bucket
               aws s3 rm s3://udapeople-${OldWorkflowId}/ --recursive
               # Delete front end stack
-              aws cloudformation delete-stack --stack-name udacity-frontend-${OldWorkflowId}
+              aws cloudformation delete-stack --stack-name udapeople-frontend-${OldWorkflowId}
               # Delete back end stack
-              aws cloudformation delete-stack --stack-name udacity-backend-${OldWorkflowId}
+              aws cloudformation delete-stack --stack-name udapeople-backend-${OldWorkflowId}
             fi
       - destroy-environment  
       - revert-migrations 
