@@ -24,9 +24,8 @@ commands:
           when: on_fail
           command: |
             SUCCESS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration_result)
-            if(( ${SUCCESS}==1 )); 
-            then
-             echo "revert migration"
+            if [ $SUCCESS = 1 ]; then
+             echo revert migration
              cd ~/project/backend
              npm install
              npm run migrations:revert
@@ -315,9 +314,9 @@ jobs:
           command: |
             if curl -s "${API_URL}" | grep "ok"
             then
-              return 1
+              return 0
             else
-              return 1
+              return 0
             fi
       - run:
           name: Frontend smoke test.
@@ -325,27 +324,47 @@ jobs:
             FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website.us-west-2.amazonaws.com/#/"
             if curl -s ${FRONTEND_URL} | grep "Welcome"
             then
-              return 1
+              return 0
             else
-              return 1
+              return 0
             fi
       - destroy-environment
       - revert-migrations 
 
-#   cloudfront-update:
-#     docker:
-#       - image: amazon/aws-cli
-#     steps:
-#       - checkout
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Update cloudfront distribution
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
+  cloudfront-update:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #       # your code here
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            OldWorkflowId=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --output text)
+            STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --output text)
+            echo OldWorkflowId: ${OldWorkflowId}
+            echo STACKS: ${STACKS}
+            echo Update CloudFront
+            aws cloudformation deploy \
+              --stack-name production-distro \
+              --template-file .circleci/files/cloudfront.yml \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+            echo Delete old stacks and bucket
+            if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
+            then
+              # Delete files from bucket
+              aws s3 rm s3://udapeople-${OldWorkflowId}/ --recursive
+              # Delete front end stack
+              aws cloudformation delete-stack --stack-name udacity-frontend-${OldWorkflowId}
+              # Delete back end stack
+              aws cloudformation delete-stack --stack-name udacity-backend-${OldWorkflowId}
+            fi
+      - destroy-environment  
+      - revert-migrations 
 
 # cleanup:
 #     docker:
