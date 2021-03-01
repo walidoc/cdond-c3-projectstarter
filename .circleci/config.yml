@@ -10,9 +10,9 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            aws s3 rm s3://udapeople-CIRCLE-WORKFLOW-ID/ --recursive
-            aws cloudformation delete-stack --stack-name udapeople-backend-CIRCLE-WORKFLOW-ID
-            aws cloudformation delete-stack --stack-name udapeople-frontend-CIRCLE-WORKFLOW-ID
+            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
+            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID}
+            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID}
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -23,7 +23,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS=$(curl -H "token: CIRCLE-WORKFLOW-ID" --request GET https://api.memstash.io/values/migration_result)
+            SUCCESS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration_result)
             if(( ${SUCCESS}==1 )); 
             then
              echo "revert migration"
@@ -41,7 +41,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            - frontend-build-CIRCLE-WORKFLOW-ID
+            - frontend-build-${CIRCLE_WORKFLOW_ID}
       - run:
           name: Build front-end
           command: |
@@ -54,7 +54,7 @@ jobs:
           paths: 
             - frontend/node_modules
             - frontend/dist
-          key: frontend-build-CIRCLE-WORKFLOW-ID
+          key: frontend-build-${CIRCLE_WORKFLOW_ID}
 
   build-backend:
     docker:
@@ -63,7 +63,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            - backend-build-CIRCLE-WORKFLOW-ID
+            - backend-build-${CIRCLE_WORKFLOW_ID}
       - run:
           name: Back-end build
           command: |
@@ -74,7 +74,7 @@ jobs:
           paths: 
             - backend/node_modules
             - backend/dist
-          key: backend-build-CIRCLE-WORKFLOW-ID
+          key: backend-build-${CIRCLE_WORKFLOW_ID}
 
   test-frontend:
     docker:
@@ -83,7 +83,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            - frontend-build-CIRCLE-WORKFLOW-ID
+            - frontend-build-${CIRCLE_WORKFLOW_ID}
       - run:
           name: Front-end test
           command: |
@@ -97,7 +97,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            - backend-build-CIRCLE-WORKFLOW-ID
+            - backend-build-${CIRCLE_WORKFLOW_ID}
       - run:
           name: Back-end test
           command: |
@@ -111,7 +111,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            - frontend-build-CIRCLE-WORKFLOW-ID
+            - frontend-build-${CIRCLE_WORKFLOW_ID}
       - run:
           name: Front-end audit
           command: |
@@ -133,7 +133,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            - backend-build-CIRCLE-WORKFLOW-ID
+            - backend-build-${CIRCLE_WORKFLOW_ID}
       - run:
           name: Back-end scan
           command: |
@@ -159,23 +159,23 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=udapeopleback \
-              --stack-name "udapeople-backend-CIRCLE-WORKFLOW-ID" \
-              --parameter-overrides ID="CIRCLE-WORKFLOW-ID"  
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeoplefront \
-              --stack-name "udapeople-frontend-CIRCLE-WORKFLOW-ID" \
-              --parameter-overrides ID="CIRCLE-WORKFLOW-ID"  
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
       - run:
           name: Add back-end ip to ansible inventory
           command: |
             BACKEND_URL=$(aws ec2 describe-instances --query "Reservations[*].Instances[*].PublicDnsName" --filters "Name=tag:project,Values=udapeopleback" --region us-west-2 --output text)
             echo "${BACKEND_URL}"
             echo "${BACKEND_URL}" >> .circleci/ansible/inventory.txt
-            curl -H "Content-Type: text/plain" -H "token: CIRCLE-WORKFLOW-ID" --request PUT --data "${BACKEND_URL}" https://api.memstash.io/values/backend_url
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "${BACKEND_URL}" https://api.memstash.io/values/backend_url
       - run: 
           name: Install dependencies
           command: | 
@@ -214,7 +214,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            - backend-build-CIRCLE-WORKFLOW-ID
+            - backend-build-${CIRCLE_WORKFLOW_ID}
       - run:
           name: Run migrations
           command: |
@@ -229,11 +229,11 @@ jobs:
             MIGRATION_RESULT=`grep -c "No migrations are pending" migration`
             echo $MIGRATION_RESULT
             curl -H "Content-Type: text/plain" \
-               -H "token: CIRCLE-WORKFLOW-ID" \
+               -H "token: ${CIRCLE_WORKFLOW_ID}" \
                --request PUT \
                --data ${MIGRATION_RESULT} \
                https://api.memstash.io/values/migration_result
-            TEST_RESPONSE=$(curl -H "token: CIRCLE-WORKFLOW-ID" --request GET https://api.memstash.io/values/migration_result)
+            TEST_RESPONSE=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration_result)
             echo "test memstash result"
             echo ${TEST_RESPONSE}
       - destroy-environment  
@@ -245,11 +245,11 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            - frontend-build-CIRCLE-WORKFLOW-ID
+            - frontend-build-${CIRCLE_WORKFLOW_ID}
       - run:
           name: Get backend url
           command: |
-            BACKEND_URL=$(curl -H "token: CIRCLE-WORKFLOW-ID" --request GET https://api.memstash.io/values/backend_url)
+            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/backend_url)
             export API_URL="http://${BACKEND_URL}:3000"
             echo "${API_URL}"
       - run:
@@ -258,7 +258,7 @@ jobs:
             cd ~/project/frontend
             npm install
             npm run build
-            aws s3 cp ./dist s3://udapeople-CIRCLE-WORKFLOW-ID/ --recursive
+            aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
       - destroy-environment  
       - revert-migrations
 
@@ -269,7 +269,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: 
-            - backend-build-CIRCLE-WORKFLOW-ID
+            - backend-build-${CIRCLE_WORKFLOW_ID}
       - add_ssh_keys:
           fingerprints: ['2f:c0:9f:0c:82:6e:2e:00:7f:fd:b2:10:3b:d0:bf:3b']
       - attach_workspace:
@@ -308,7 +308,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            BACKEND_URL=$(curl -H "token: CIRCLE-WORKFLOW-ID" --request GET https://api.memstash.io/values/backend_url)
+            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/backend_url)
             export API_URL="https://${BACKEND_URL}:3000/api/status"
       - run:
           name: Backend smoke test.
@@ -322,7 +322,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            FRONTEND_URL="http://udapeople-CIRCLE-WORKFLOW-ID.s3-website.us-west-2.amazonaws.com/#/"
+            FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website.us-west-2.amazonaws.com/#/"
             if curl -s ${FRONTEND_URL} | grep "Welcome"
             then
               return 1
