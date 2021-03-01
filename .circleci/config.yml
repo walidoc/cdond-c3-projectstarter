@@ -198,6 +198,7 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible
+            pip3 install awscli
       - run:
           name: Configure server
           command: |
@@ -207,7 +208,7 @@ jobs:
 
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0
+      - image: sleavely/node-awscli:12.x
     steps:
       - checkout
       - restore_cache:
@@ -277,6 +278,8 @@ jobs:
           command: |
             apk add --update ansible
             apk add --update npm
+            apk add curl
+            pip3 install awscli
       - run:
           name: Deploy backend
           command: |
@@ -299,6 +302,8 @@ jobs:
           command: |
             apk add --update ansible
             apk add curl
+            apk add --update npm
+            pip3 install awscli
       - run:
           name: Get backend url
           command: |
