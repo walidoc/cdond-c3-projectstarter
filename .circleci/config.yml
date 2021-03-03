@@ -291,18 +291,25 @@ jobs:
           command: |
             apk add --update ansible
             apk add --update npm
-            apk add --update curl
+            apk add --update tar gzip curl
+            apk add --update openssh-client
             pip3 install awscli
+      - run:
+          name: Compress Backend
+          command: |
+            tar -C backend -czvf artifact.tar.gz .
+            ls -la
       - run:
           name: Deploy backend
           command: |
-            cd ~/project/backend
-            npm i
-            npm run build
-            cd ~/project/.circleci/ansible/
-            export ANSIBLE_HOST_KEY_CHECKING=False
-            cat /tmp/.circleci/ansible/inventory.txt
-            ansible-playbook -i /tmp/.circleci/ansible/inventory.txt deploy-backend.yml
+            # cd ~/project/backend
+            # npm i
+            # npm run build
+            # cd ~/project/.circleci/ansible/
+            # export ANSIBLE_HOST_KEY_CHECKING=False
+            # cat /tmp/.circleci/ansible/inventory.txt
+            # ansible-playbook -i /tmp/.circleci/ansible/inventory.txt deploy-backend.yml
+            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /tmp/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       - destroy-environment
       - revert-migrations
 
@@ -331,7 +338,7 @@ jobs:
             then
               return 0
             else
-              return 0
+              return 1
             fi
       - run:
           name: Frontend smoke test.
@@ -341,7 +348,7 @@ jobs:
             then
               return 0
             else
-              return 0
+              return 1
             fi
       - destroy-environment
       - revert-migrations 
@@ -374,9 +381,6 @@ jobs:
               export STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --output text)
               echo OldWorkflowId: ${OldWorkflowId}
               echo STACKS: ${STACKS}
-        - run:
-            name: Remove old stacks and files
-            command: |
               if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
               then
                 aws cloudformation delete-stack --stack-name udapeople-frontend-${OldWorkflowId}
@@ -384,6 +388,16 @@ jobs:
                 aws s3 rm s3://udapeople-${OldWorkflowId}/ --recursive
                 aws s3 rb s3://udapeople-${OldWorkflowID} --force
               fi
+        # - run:
+        #     name: Remove old stacks and files
+        #     command: |
+        #       if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
+        #       then
+        #         aws cloudformation delete-stack --stack-name udapeople-frontend-${OldWorkflowId}
+        #         aws cloudformation delete-stack --stack-name udapeople-backend-${OldWorkflowId}
+        #         aws s3 rm s3://udapeople-${OldWorkflowId}/ --recursive
+        #         aws s3 rb s3://udapeople-${OldWorkflowID} --force
+        #       fi
             
 workflows:
   default:
