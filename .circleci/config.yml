@@ -218,26 +218,33 @@ jobs:
           keys: 
             - backend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
+          name: awscli install
+          command: |
+            sudo apt-get -y -qq update
+            sudo apt-get -qq install awscli
+            # sudo apt-get -y -qq install python3
+      - run:
           name: Run migrations
           command: |
             cd ~/project/backend
-            npm run migrations > migration
+            touch migration
+            npm run migrations >> migration
             cat migration
       - run:
           name: Send migration results to memstash
           command: |
             cd ~/project/backend
-            echo grep -c "has been executed successfully" migration
-            MIGRATION_RESULT=`grep -c "has been executed successfully" migration`
-            echo $MIGRATION_RESULT
-            curl -H "Content-Type: text/plain" \
-               -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
-               --request PUT \
-               --data ${MIGRATION_RESULT} \
-               https://api.memstash.io/values/migration_result
-            TEST_RESPONSE=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/migration_result)
-            echo "test memstash result"
-            echo ${TEST_RESPONSE}
+            if grep -q "has been executed successfully" migration
+            then
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
+            --request PUT \
+            --data "1" https://api.memstash.io/values/migration_result
+            else
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
+            --request PUT \
+            --data "0" https://api.memstash.io/values/migration_result
+            fi
+
       - destroy-environment  
       - revert-migrations
 
