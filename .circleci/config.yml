@@ -241,7 +241,6 @@ jobs:
             --request PUT \
             --data "1" https://api.memstash.io/values/migration_result
             fi
-
       - destroy-environment  
       - revert-migrations
 
@@ -298,7 +297,7 @@ jobs:
           name: Deploy backend
           command: |
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /tmp/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
-      # - destroy-environment
+      - destroy-environment
       - revert-migrations
 
   smoke-test:
@@ -335,7 +334,7 @@ jobs:
             else
               return 1
             fi
-      # - destroy-environment
+      - destroy-environment
       - revert-migrations 
 
   cloudfront-update:
