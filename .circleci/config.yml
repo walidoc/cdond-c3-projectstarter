@@ -236,15 +236,12 @@ jobs:
           name: Send migration results to memstash
           command: |
             cd ~/project/backend
-            if grep -q "has been executed successfully" migration
+            cat migration
+            if grep -q "has been executed successfully" migration || grep -q "No migrations are pending" migration
             then
             curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
             --request PUT \
             --data "1" https://api.memstash.io/values/migration_result
-            else
-            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
-            --request PUT \
-            --data "0" https://api.memstash.io/values/migration_result
             fi
 
       - destroy-environment  
@@ -310,8 +307,8 @@ jobs:
             # cat /tmp/.circleci/ansible/inventory.txt
             # ansible-playbook -i /tmp/.circleci/ansible/inventory.txt deploy-backend.yml
             ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /tmp/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
-      - destroy-environment
-      - revert-migrations
+      # - destroy-environment
+      # - revert-migrations
 
   smoke-test:
     docker:
@@ -425,9 +422,9 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
-      - smoke-test:
-          requires: [deploy-backend, deploy-frontend]
-      - cloudfront-update:
-          requires: [smoke-test]
-      - cleanup:
-          requires: [cloudfront-update]
+      # - smoke-test:
+      #     requires: [deploy-backend, deploy-frontend]
+      # - cloudfront-update:
+      #     requires: [smoke-test]
+      # - cleanup:
+      #     requires: [cloudfront-update]
