@@ -345,6 +345,9 @@ jobs:
       - run:
           name: Update cloudfront distribution
           command: |
+            export OldWorkflowId=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --output text)
+            export STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --output text)
+            
             aws cloudformation deploy \
               --stack-name udapeople-cloudfront \
               --template-file .circleci/files/cloudfront.yml \
@@ -361,8 +364,6 @@ jobs:
         - run:
             name: Get old stack workflow id and cleanup
             command: |
-              export OldWorkflowId=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --output text)
-              export STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --output text)
               echo OldWorkflowId: ${OldWorkflowId}
               echo STACKS: ${STACKS}
               if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
