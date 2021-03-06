@@ -32,15 +32,14 @@
   shell: |
     cd /home/ubuntu/backend
     tar xvzf artifact.tar.gz -C .
-    ls -la
     
 - name: Build
   become: true
   shell: |
     cd /home/ubuntu/backend
     npm install
-    cat .env
-    npm run build
+    printenv
+    npm run prestart:prod
     
 - name: Start PM2
   shell: |

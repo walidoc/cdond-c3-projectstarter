@@ -253,18 +253,22 @@ jobs:
           keys: 
             - frontend-build-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
-          name: Get backend url
+          name: Get backend url deploy
           command: |
             BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/backend_url)
             export API_URL="http://${BACKEND_URL}:3030"
             echo "${API_URL}"
-      - run:
-          name: Deploy frontend objects
-          command: |
             cd ~/project/frontend
             npm install
             npm run build
             aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
+      # - run:
+      #     name: Deploy frontend objects
+      #     command: |
+      #       cd ~/project/frontend
+      #       npm install
+      #       npm run build
+      #       aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
       - destroy-environment  
       - revert-migrations
 
