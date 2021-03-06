@@ -1,0 +1,5 @@
+URL01: https://github.com/walidoc/cdond-c3-projectstarter
+URL02: http://udapeople-84d90a6.s3-website-us-east-1.amazonaws.com/#/employees
+URL03: d3qaqxsa4d9sn8.cloudfront.net
+URL04: http://ec2-18-233-6-12.compute-1.amazonaws.com:3030/
+URL05: http://ec2-54-242-241-218.compute-1.amazonaws.com:9090/

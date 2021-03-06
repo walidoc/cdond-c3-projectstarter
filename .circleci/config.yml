@@ -343,35 +343,49 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Update cloudfront distribution
+          name: Update cloudfront distribution and cleanup
           command: |
             export OldWorkflowId=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --output text)
             export STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --output text)
-            
+            echo OldWorkflowId: ${OldWorkflowId}
+            echo STACKS: ${STACKS}
             aws cloudformation deploy \
               --stack-name udapeople-cloudfront \
               --template-file .circleci/files/cloudfront.yml \
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
+            if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
+            then
+              aws cloudformation delete-stack --stack-name udapeople-frontend-${OldWorkflowId}
+              aws cloudformation delete-stack --stack-name udapeople-backend-${OldWorkflowId}
+              aws s3 rm s3://udapeople-${OldWorkflowId}/ --recursive
+            fi
       - destroy-environment  
       - revert-migrations 
 
-  cleanup:
-      docker:
-        - image: amazon/aws-cli
-      steps:
-        - checkout
-        - run:
-            name: Get old stack workflow id and cleanup
-            command: |
-              echo OldWorkflowId: ${OldWorkflowId}
-              echo STACKS: ${STACKS}
-              if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
-              then
-                aws cloudformation delete-stack --stack-name udapeople-frontend-${OldWorkflowId}
-                aws cloudformation delete-stack --stack-name udapeople-backend-${OldWorkflowId}
-                aws s3 rm s3://udapeople-${OldWorkflowId}/ --recursive
-              fi
+  # cleanup:
+  #     docker:
+  #       - image: amazon/aws-cli
+  #     steps:
+  #       - checkout
+  #       - run:
+  #           name: Get old stack workflow id and cleanup
+  #           command: |
+  #           export OldWorkflowId=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --output text)
+  #           export STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --output text)
+  #           echo OldWorkflowId: ${OldWorkflowId}
+  #           echo STACKS: ${STACKS}
+  #           aws cloudformation deploy \
+  #             --stack-name udapeople-cloudfront \
+  #             --template-file .circleci/files/cloudfront.yml \
+  #             --region ${AWS_DEFAULT_REGION} \
+  #             --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
+  #           if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
+  #           then
+  #             aws cloudformation delete-stack --stack-name udapeople-frontend-${OldWorkflowId}
+  #             aws cloudformation delete-stack --stack-name udapeople-backend-${OldWorkflowId}
+  #             aws s3 rm s3://udapeople-${OldWorkflowId}/ --recursive
+  #           fi
             
 workflows:
   default:
@@ -403,5 +417,5 @@ workflows:
           requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
           requires: [smoke-test]
-      - cleanup:
-          requires: [cloudfront-update]
+      # - cleanup:
+      #     requires: [cloudfront-update]
